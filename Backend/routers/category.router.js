@@ -1,5 +1,6 @@
 const { Category } = require('../models/category');
 var express = require('express');
+const mongoose = require('mongoose');
 
 var router = express();
 
@@ -28,6 +29,7 @@ router.post(`/`, async (req, res) =>{
 
 
 router.delete('/:id', async (req, res) => {
+	mongoose.isValidObjectId(req.params.id);
 	Category.findByIdAndRemove(req.params.id).then(category => {
 		(!category) ? res.status(404).send('No record of category found') 
 			: res.status(200).send({ status: 'success', message: 'Category successfully deleted' });
@@ -39,9 +41,23 @@ router.delete('/:id', async (req, res) => {
 
 
 router.get( "/:id", async ( req, res )=> {
+	mongoose.isValidObjectId(req.params.id);
 	const category = await Category.findById(req.params.id);
 	( !category ) ? res.status( 404 ).json( { 
 		error : "Category not found", status: false } ) : res.send( category );
 } ); 
+
+
+router.put('/:id', async (req, res) => {
+	mongoose.isValidObjectId(req.params.id);
+	const category = await Category.findByIdAndUpdate(
+		req.params.id, {
+			name: req.body.name,
+			icon: req.body.icon,
+			color: req.body.color
+		});
+	(category) ? res.json({ status: 'success', message: 'Category was successfully updated' })
+		: res.status(404).json({ status: 'failure', message: 'No category found for update' });
+});
 
 module.exports = router;
